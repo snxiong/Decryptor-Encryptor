@@ -1,10 +1,11 @@
 C:\Users\sxiong\source\repos\decrypter\decrypter\bin\Debug\decrypter.exe.config
 C:\Users\sxiong\source\repos\decrypter\decrypter\bin\Debug\decrypter.exe
 C:\Users\sxiong\source\repos\decrypter\decrypter\bin\Debug\decrypter.pdb
-C:\Users\sxiong\source\repos\decrypter\decrypter\obj\Debug\decrypter.csprojAssemblyReference.cache
 C:\Users\sxiong\source\repos\decrypter\decrypter\obj\Debug\decrypter.Form1.resources
 C:\Users\sxiong\source\repos\decrypter\decrypter\obj\Debug\decrypter.Properties.Resources.resources
 C:\Users\sxiong\source\repos\decrypter\decrypter\obj\Debug\decrypter.csproj.GenerateResource.cache
 C:\Users\sxiong\source\repos\decrypter\decrypter\obj\Debug\decrypter.exe
 C:\Users\sxiong\source\repos\decrypter\decrypter\obj\Debug\decrypter.pdb
 C:\Users\sxiong\source\repos\decrypter\decrypter\obj\Debug\decrypter.csproj.ResolveComReference.cache
+C:\Users\sxiong\source\repos\decrypter\decrypter\obj\Debug\decrypter.csproj.AssemblyReference.cache
+C:\Users\sxiong\source\repos\decrypter\decrypter\obj\Debug\decrypter.csproj.CoreCompileInputs.cache
