@@ -16,6 +16,7 @@ using System.Windows.Forms;
 using System.Linq;
 using System.Diagnostics;
 
+
 namespace decrypter
 {
     
@@ -26,7 +27,7 @@ namespace decrypter
         private string anotherKey = "abcdefghijklmnop";
         private string filePath = ""; // empty string
         private bool stuff = true;
-
+        private bool errorMsg = false;
 
         public Form1()
         {
@@ -39,7 +40,7 @@ namespace decrypter
 
             button3.Click += new EventHandler(button3_Click);
 
-            
+           
             
         }
 
@@ -48,16 +49,25 @@ namespace decrypter
         {
 
         }
-        // INFO https://www.youtube.com/watch?v=2moh18sh5p4
+
+
+
+        private async void button1_Click(object sender, EventArgs e)
+        {
+            await button1_ClickAsync();
+        }
+
+        // INFO https://www.youtube.com/watch?v=2moh18sh5p4, on how I implemented Async programming
         // File decryption using Asynchronous programming
         private async Task button1_ClickAsync()
         {
             // decrypt_file button
 
-            var sw = new Stopwatch();
-            sw.Start();
+            
+
 
             textBox2.Text = "";
+            textBox3.Text = "";
             textBox4.Text = "Processing. . . . .";
              
 
@@ -70,8 +80,8 @@ namespace decrypter
             xlWorkSheet = xlWorkBook.Worksheets[1];
 
             //in what row and columnm to begin decrypting on
-            int i = 2; //row
-            int j = 2; //column
+            int i = 1; //row
+            int j = 1; //column
 
             string decryptedData = "";
 
@@ -83,14 +93,27 @@ namespace decrypter
             //in what row and column to where to place the decypted file on the new excel file
             int row = 1;
             int column = 1;
+            int cellCount = 0;
 
-            
+            var sw = new Stopwatch();
+            sw.Start();
+
             do
             {
+      
                 if (xlWorkSheet.Cells[i, j].Text != "NULL")
                 {
                     decryptedData = xlWorkSheet.Cells[i, j].Value2;
-                    decryptedData = await Task.Run(() => DecryptString(decryptedData));
+                    decryptedData = await Task.Run(() => DecryptString(decryptedData, textBox5.Text));
+                    if(decryptedData == null)
+                    {
+                        button1.Enabled = false;
+                        button2.Enabled = true;
+                        button3.Enabled = true;
+                        textBox1.Text = "";
+                        textBox4.Text = "";
+                        return;
+                    }
                     newXLWorksheet.Cells[row, column] = decryptedData;
                     row++;
                 }
@@ -100,15 +123,38 @@ namespace decrypter
                     newXLWorksheet.Cells[row, column] = decryptedData;
                     row++;
                 }
-
-
+                cellCount++;
+                this.textBox6.Text = cellCount.ToString();
+    
                 i++;
 
             } while (xlWorkSheet.Cells[i, j].Text != string.Empty);
+
+            textBox3.Text = sw.ElapsedMilliseconds.ToString();
+
+            Stream myStream;
+            SaveFileDialog saveFileDialog1 = new SaveFileDialog();
+
+            saveFileDialog1.Filter = "Excel File | *.xls";
+            saveFileDialog1.FilterIndex = 2;
+            saveFileDialog1.RestoreDirectory = true;
+
+            
+            if(saveFileDialog1.ShowDialog() == DialogResult.OK)
+            {
+                /*
+                if((myStream = saveFileDialog1.OpenFile()) != null)
+                {
+                    myStream.Close();
+                }
+                */
+            }
+            
             
 
             // location and file name of where the program will save the decypted information
-            excelApp.ActiveWorkbook.SaveAs(@"C:\Users\sxiong\desktop\decrypttest.xls", Excel.XlFileFormat.xlWorkbookNormal);
+            //excelApp.ActiveWorkbook.SaveAs(@"C:\Users\sxiong\desktop\decrypttest.xls", Excel.XlFileFormat.xlWorkbookNormal);
+            excelApp.ActiveWorkbook.SaveAs(saveFileDialog1.FileName, Excel.XlFileFormat.xlWorkbookNormal);
 
             newXLWorkbook.Close();
             excelApp.Quit();
@@ -119,21 +165,29 @@ namespace decrypter
             GC.Collect();
             GC.WaitForPendingFinalizers();
 
-            textBox2.Text = "Decryption Done";
+            textBox2.Text = "Decryption Done. Saved at " + saveFileDialog1.FileName;
 
-            textBox3.Text = sw.ElapsedMilliseconds.ToString();
+            
 
             textBox4.Text = "Done";
+            button2.Enabled = true;
+            button3.Enabled = true;
         }
 
+        private int incrementCount(int currentCount)
+        {
+            currentCount++;
+            return currentCount;
+        }
 
         // File decryption using Parallel programming
+        // NOT IN USE
+        /*
         private async Task button1_ClickParallel()
         {
             // decrypt_file button
 
-            var sw = new Stopwatch();
-            sw.Start();
+            
 
             textBox4.Text = "Processing. . . . .";
 
@@ -160,23 +214,28 @@ namespace decrypter
             //in what row and column to where to place the decypted file on the new excel file
             int row = 1;
             int column = 1;
+            int cellCount = 0;
+            var sw = new Stopwatch();
+            sw.Start();
 
             List<Task<string>> task = new List<Task<string>>();
 
             do
             {
-                if (xlWorkSheet.Cells[i, j].Text != "NULL")
+                cellCount++;
+                this.textBox6.Text = cellCount.ToString();
+                if (xlWorkSheet.Cells[i, j].Text != "NULL" || xlWorkSheet.Cells[i, j].Text != null)
                 {
                     decryptedData = xlWorkSheet.Cells[i, j].Value2;
                     //decryptedData = await Task.Run(() => DecryptString(decryptedData));
-                    task.Add(Task.Run(() => DecryptString(decryptedData)));
+                    task.Add(Task.Run(() => DecryptString(decryptedData, textBox5.Text)));
                     //newXLWorksheet.Cells[row, column] = decryptedData;
                     //row++;
                 }
                 else
                 {
                     decryptedData = "NULL";
-                    task.Add(Task.Run(() => DecryptString(decryptedData)));
+                    task.Add(Task.Run(() => DecryptString(decryptedData, textBox5.Text)));
                     //newXLWorksheet.Cells[row, column] = decryptedData;
                     //row++;
                 }
@@ -194,8 +253,10 @@ namespace decrypter
             {
                 newXLWorksheet.Cells[row, column] = item;
                 row++;
+                
             }
-            
+
+            textBox3.Text = sw.ElapsedMilliseconds.ToString();
 
 
             // location and file name of where the program will save the decypted information
@@ -212,19 +273,18 @@ namespace decrypter
 
             textBox2.Text = "Decryption Done";
 
-            textBox3.Text = sw.ElapsedMilliseconds.ToString();
+            
 
             textBox4.Text = "Done";
         }
+        */
 
-
-        private async void button1_Click(object sender, EventArgs e)
-        {
-            await button1_ClickAsync();
-        }
+        
 
         // File decryption using synchronous programming
-        private async void button1_ClickSynchronous(object sender, EventArgs e)
+        // NOT IN USE
+        /*
+        private void button1_ClickSynchronous(object sender, EventArgs e)
         {   // decrypt_file button
 
             //await button1_ClickAsync();
@@ -263,7 +323,7 @@ namespace decrypter
                 if(xlWorkSheet.Cells[i,j].Text != "NULL")
                 {
                     decryptedData = xlWorkSheet.Cells[i, j].Value2;
-                    decryptedData = DecryptString(decryptedData);
+                    decryptedData = DecryptString(decryptedData, textBox5.Text);
                     newXLWorksheet.Cells[row, column] = decryptedData;
                     row++;
                 }
@@ -298,22 +358,47 @@ namespace decrypter
             textBox4.Text = "DONE";
 
         }
+        */
 
-        private async void button2_Click(object sender, EventArgs e)
+        private void button2_Click(object sender, EventArgs e)
         {
-            //textBox2.Text = DecryptString(textBox1.Text);
+            errorMsg = false;
+            if (textBox1.Text == string.Empty)
+            {
+                
+                MessageBox.Show("Enter something into \"Input\"");
+            }
+            else
+            {
+                textBox2.Text = DecryptString(textBox1.Text, textBox5.Text);
+            }
 
-            await button1_ClickAsync();
+            
+
+            //await button1_ClickAsync();
         }
 
         private void button3_Click(object sender, EventArgs e)
         {
-            textBox2.Text = EncryptData(textBox1.Text);
+            errorMsg = false;
+            if (textBox1.Text == string.Empty)
+            {
+                MessageBox.Show("Enter something into \"Input\"");
+            }
+            else
+            {
+                textBox2.Text = EncryptData(textBox1.Text, textBox5.Text);
+            }
+            
         }
 
         private void button4_Click(object sender, EventArgs e)
         {
-          
+
+            button1.Enabled = false;
+            textBox2.Text = "";
+            textBox3.Text = "";
+            textBox4.Text = "";
             filePath = load_ExcelFile();
         }
 
@@ -327,24 +412,44 @@ namespace decrypter
             openFile.FilterIndex = 0;
             openFile.RestoreDirectory = true;
 
-            textBox1.Text = "File Loaded";
+            //textBox1.Text = ;
             if(openFile.ShowDialog() == DialogResult.OK)
             {
                 string path = openFile.FileName;
+                string fileName = Path.GetFileName(openFile.FileName);
+                textBox1.Text = "File Loaded " + "\""+fileName + "\"";
                 //textBox1.Text = path;
+                button2.Enabled = false;
+                button3.Enabled = false;
+                button1.Enabled = true;
                 return path;
             }
+
 
             return null;
         }
 
-        public static string EncryptData(string message)
+        public static string EncryptData(string message, string userKey)
         {
             string passKey = string.Empty;
 
+
+            if(userKey == string.Empty)
+            {
+                passKey = GetKey();
+            }
+            else if(userKey.Length == 16)
+            {
+                passKey = userKey;
+            }
+            else
+            {
+                MessageBox.Show("Key entered isn't exactly 16-characters");
+                return null;
+            }
             //passKey = "anotherKey";
-            passKey = GetKey();
-        
+
+
             RijndaelManaged aes256 = new RijndaelManaged();
             //4qFdu0feymPJkO6aJnFK1IEFgK/BF2EJAq/o9qxQT3Q=
 
@@ -368,16 +473,51 @@ namespace decrypter
             return Convert.ToBase64String(cypherTextBytes);
         }
 
-        public static string DecryptString(string text)
+        public static string DecryptString(string text, string userKey)
         {
             string passKey = string.Empty;
 
-            if(text == "NULL")
+            try
             {
-                return "NULL";
+                /*
+                if (text == "NULL")
+                {
+                    return "NULL";
+                }
+                */
+                if(text == null)
+                {
+                    return "NULL";
+                }
+                else if(text.Equals("NULL", StringComparison.InvariantCultureIgnoreCase))
+                {
+                    return "NULL";
+                }
+                
+            }
+            catch (System.NullReferenceException e)
+            {
+                MessageBox.Show("Invalid File");
+                return null;
             }
 
-            passKey = GetKey();
+
+
+
+            if (userKey == string.Empty)
+            {
+                passKey = GetKey();
+            }
+            else if (userKey.Length == 16)
+            {
+                passKey = userKey;
+            }
+            else
+            {
+                MessageBox.Show("Key entered isn't exactly 16-characters");
+                return null;
+            }
+
 
             RijndaelManaged aes256 = new RijndaelManaged();
 
@@ -388,21 +528,45 @@ namespace decrypter
             aes256.Key = Encoding.ASCII.GetBytes(passKey);
             aes256.GenerateIV();
 
-            byte[] encryptedData = Convert.FromBase64String(text);
-            ICryptoTransform transform = aes256.CreateDecryptor();
-            byte[] plainText = transform.TransformFinalBlock(encryptedData, 0, encryptedData.Length);
+            byte[] encryptedData;
 
-            return Encoding.UTF8.GetString(plainText);
+            try { 
+                encryptedData = Convert.FromBase64String(text);
+            }
+            catch(System.FormatException e)
+            {
+                MessageBox.Show("Invalid Input" + text);
+                return null;
+            }
+
+            ICryptoTransform transform = aes256.CreateDecryptor();
+
+            try
+            {
+                byte[] plainText = transform.TransformFinalBlock(encryptedData, 0, encryptedData.Length);
+                return Encoding.UTF8.GetString(plainText);
+            }
+            catch(System.Security.Cryptography.CryptographicException e)
+            {
+                MessageBox.Show("Invalid input or Wrong key used");
+                return null;
+            }
+            
+            
+
+            return null;
         }
 
-      
+
 
         public static string GetKey()
         {
             string registryValue = string.Empty;
 
+            
+
             // input encryption key here, but be 16-byte key ex."abcdefghijklmnop"
-            RegistryKey registryKey = Registry.LocalMachine.OpenSubKey(@""); // <-- location of key
+            RegistryKey registryKey = Registry.LocalMachine.OpenSubKey(@"SOFTWARE\WOW6432Node\OETS"); // <-- location of key
 
             try
             {
@@ -432,5 +596,44 @@ namespace decrypter
 
         }
 
+        private void label1_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void button3_Click_1(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label2_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox4_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Form1_Load(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label3_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void textBox6_TextChanged(object sender, EventArgs e)
+        {
+
+        }
+
+        private void label7_Click(object sender, EventArgs e)
+        {
+
+        }
     }
 }

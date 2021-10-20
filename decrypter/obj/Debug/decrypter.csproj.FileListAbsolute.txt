@@ -9,3 +9,7 @@ C:\Users\sxiong\source\repos\decrypter\decrypter\obj\Debug\decrypter.pdb
 C:\Users\sxiong\source\repos\decrypter\decrypter\obj\Debug\decrypter.csproj.ResolveComReference.cache
 C:\Users\sxiong\source\repos\decrypter\decrypter\obj\Debug\decrypter.csproj.AssemblyReference.cache
 C:\Users\sxiong\source\repos\decrypter\decrypter\obj\Debug\decrypter.csproj.CoreCompileInputs.cache
+C:\Users\sxiong\source\repos\decrypter\decrypter\bin\Debug\decrypter.exe.manifest
+C:\Users\sxiong\source\repos\decrypter\decrypter\bin\Debug\decrypter.application
+C:\Users\sxiong\source\repos\decrypter\decrypter\obj\Debug\decrypter.exe.manifest
+C:\Users\sxiong\source\repos\decrypter\decrypter\obj\Debug\decrypter.application
